@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, user-scalable=0, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>粒子签到 - 聚现场微信大屏幕</title>
+  <link rel="stylesheet" type="text/css" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/basic.css">
+  <script type="text/javascript">
+    var need_login = "1";
+    var SCENE_INFO = {
+      "title": "聚现场微信大屏幕",
+      "top_title": ["\u5fae\u4fe1\u73b0\u573a\u4e92\u52a83D\u7b7e\u5230\u6f14\u793a"],
+      "top_font_size": "30",
+      "memo": "",
+      "top_img": "http://of3kdd1ar.bkt.clouddn.com/images/1/2017/03/Q5gSN1py2MH28f6sex6eF0m31f65HP.png",
+      "bg_img": "",
+      "bottom_img": "http://of3kdd1ar.bkt.clouddn.com/images/1/2017/03/Q5gSN1py2MH28f6sex6eF0m31f65HP.png",
+      "diy_css": ".mp_account_codeimage {display: none;}",
+      "keyword": "",
+      "mp_username": "聚现场",
+      "func": {
+        "wall": "1",
+        "lottery": "1",
+        "shake": "1"
+      },
+      "navbar": {
+        "wall": "1",
+        "lottery": "1",
+        "lottery_free": "1",
+        "shake": "1",
+        "shake_free": "1"
+      }
+    };
+    var WALL_INFO = {
+      "id": "12",
+      "scene_id": 12,
+      "title": "", //网页顶部标题
+      "show_style": "", //滚动 或者 翻转
+      "show_type": "", //最新不循环或者随机循环
+      "re_time": "",
+      "chistory": "",
+      "show_big": "",
+      "show_big_time": ""
+    };
+    var PATH_URL = "http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/piao/";
+    var $socket_url = "ws://hd.juxianchang.com:7272";
+    var show_msg_2 = null;
+    var check_msg = null;
+    var bd_show = 0;
+  </script>
+  <style>
+    #show_hide_nav {
+      width: 100%;
+      position: fixed;
+      bottom: -10px;
+      text-align: center;
+      z-index: 9998
+    }
+
+    .Panel.Top {
+      z-index: 1
+    }
+
+    .lottery-right {
+      z-index: 10
+    }
+
+    .mp_account_codeimage {
+      display: none;
+    }
+  </style>
+  <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/tool.js" type="text/javascript" charset="utf-8"></script>
+  <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/jquery-2.1.4.js"></script>
+  <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/layer/layer.js?t=1512466383"></script>
+  <style>
+    #qd_persons {
+      position: absolute;
+      top: 29px;
+      width: 300px;
+      right: 200px;
+      color: #fff;
+    }
+
+    #qd_persons .price-div {
+      font: 12px tahoma, Arial, Verdana, sans-serif;
+    }
+
+    #qd_persons div {
+      float: left;
+      text-align: center;
+    }
+
+    #qd_persons .price-icon {
+      background: dimgrey;
+      height: 48px;
+      line-height: 48px;
+      font-size: 26px;
+      font-weight: bold;
+      float: left;
+      padding: 0 15px;
+      margin-right: 10px;
+    }
+
+    #qd_persons .price-div {
+      background: dimgrey;
+      width: 100px;
+      height: 48px;
+      line-height: 48px;
+      padding: 0 15px;
+      font-size: 26px;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/screen_lottory_free.css">
+  <link rel="stylesheet" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/3d.css?t=1512466383">
+  <link rel="stylesheet" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/3dstyle.css?t=1512466383"
+    media="screen" type="text/css">
+  <link rel="stylesheet" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/normalize.css?t=1512466383">
+  <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/qdbase.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/screen_qd.js" type="text/javascript"
+    charset="utf-8"></script>
+  <link href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/app_common.css" rel="stylesheet">
+
+  <style>
+    .Panel.Top,
+    .Panel.Bottom {
+      z-index: 9997 !important
+    }
+  </style>
+</head>
+
+<body class="FUN WALL">
+  <div class="ui" style="display:none">
+    <input class="ui-input" type="text" />
+    <span class="ui-return"></span>
+  </div>
+  <input type="hidden" id="max_id" name="max_id" value="27488">
+  <div class="Panel Top">
+    <div class="top_menu">
+      <img class="activity_logo" src="http://of3kdd1ar.bkt.clouddn.com/images/1/2017/03/Q5gSN1py2MH28f6sex6eF0m31f65HP.png" onerror="this.src='http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/top.png'">
+      <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/animateNumber.js"></script>
+      <div id="qd_persons">
+        <div class="price-icon">签到人数</div>
+        <div class="price-div">175人</div>
+      </div>
+      <img class="mp_account_codeimage" src="http://wall.juxianchang.com/attachment/images/1/2016/11/lE2Sj6EO42mM42Jzm5AnZK6OHHWMfm.jpg"
+        onerror="../attachment/qrcode_1.jpg">
+    </div>
+  </div>
+  <div id="container" style="position:relative;z-index:2;display:none;opacity: 0;"></div>
+  <canvas class="canvas" style="position:relative;z-index:2;display:none;opacity: 0;"></canvas>
+  <div class="Panel Lottery" style="display: none; opacity: 1;">
+    <div id="ddd"></div>
+    <script type="text/javascript">
+      var is_show_info = 1;
+      var hFont;
+      /*** html节点字体大小随屏幕大小改变 ***/
+      (function (doc, win) {
+        var docEl = doc.documentElement,
+          resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+          recalc = function () {
+            var clientWidth = docEl.clientWidth;
+            if (!clientWidth) return;
+            hFont = 20 * (clientWidth / 320);
+            docEl.style.fontSize = hFont + 'px';
+          };
+
+        if (!doc.addEventListener) return;
+        win.addEventListener(resizeEvt, recalc, false);
+        doc.addEventListener('DOMContentLoaded', recalc, false);
+      })(document, window);
+
+      function senddh() {
+        $('.canvas').show();
+        $('.canvas,#container').css('opacity', '1');
+      }
+    </script>
+    <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/2d.js?t=1512466383"></script>
+    <script src="js/user.js"></script>
+    <script type="text/javascript">
+      S.Drawing.init('.canvas');
+
+      var placeholder_image_cnt = 9;
+      var placeholder_image_index = 0;
+      var default_placeholder_image = "http://of3kdd1ar.bkt.clouddn.com/images/1/2017/04/R6DrOo4ohhOO63rD440O3or6or3i46.png";
+
+      var edit_personArray = new Array;
+      var placeholder_image = default_placeholder_image;
+      var table = new Array;
+      for (var i = 0; i < 160; i++) {
+        table[i] = new Object();
+        if (i < personArray.length) {
+          table[i] = personArray[i];
+          table[i].src = personArray[i].avatar;
+        } else {
+          if (placeholder_image_cnt > 0) {
+            if (placeholder_image_index >= placeholder_image_cnt) {
+              placeholder_image_index = 0;
+            }
+            placeholder_image = placeholder_image_arr[placeholder_image_index];
+            placeholder_image_index++;
+          }
+          table[i].src = placeholder_image;
+        }
+        table[i].p_x = i % 20 + 1;
+        table[i].p_y = Math.floor(i / 20) + 1;
+      }
+      //打乱数组顺序
+      table = table.sort(function () {
+        return Math.random()
+      });
+      /* 动画墙显示 屏 列表 */
+      // var signwall_show_str = "米波网络|#sphere|#torus|#helix";
+      var signwall_show_str = "27°|我们等你|#sphere|#helix|#torus";
+      /* 动画墙 切换时间？做什么用？ */
+      var show_interval = "0"; // 间隔时间
+      var return_array = new Array();
+
+      function getArrayItems(arr, num) {
+        //新建一个数组,将传入的数组复制过来,用于运算,而不要直接操作传入的数组;
+        var temp_array = new Array();
+        for (var index in arr) {
+          temp_array.push(arr[index]);
+        }
+        //取出的数值项,保存在此数组
+        for (var i = 0; i < num; i++) {
+          //判断如果数组还有可以取出的元素,以防下标越界
+          if (temp_array.length > 0) {
+            //在数组中产生一个随机索引
+            var arrIndex = Math.floor(Math.random() * temp_array.length);
+            //将此随机索引的对应的数组元素值复制出来
+            return_array[i] = temp_array[arrIndex];
+            //然后删掉此索引的数组元素,这时候temp_array变为新的数组
+            temp_array.splice(arrIndex, 1);
+          } else {
+            //数组中数据项取完后,退出循环,比如数组本来只有10项,但要求取出20项.
+            return false;
+          }
+        }
+        return return_array;
+      }
+      getArrayItems(personArray, 50);
+
+      window.onload = function () {
+        if ($(".bg_video").length > 0) {
+          $(".bg_video").css({
+            width: $("body").width() + 2,
+            height: "auto",
+            opacity: 1
+          })
+        }
+        S.init();
+        S.UI.simulate(signwall_show_str);
+      }
+      window.onresize = function () {
+        if ($(".bg_video").length > 0) {
+          $(".bg_video").css({
+            width: $("body").width() + 2,
+            height: "auto",
+            opacity: 1,
+            "z-index": 1
+          })
+        }
+      }
+      var signBox = $('.signBox'),
+        imgShow = $('.imgShow'),
+        newPic = new Array(),
+        signNo = 0,
+        className = " rightBottom ",
+        name, job, company, text, bowtie;
+      // setInterval(get_new_sign_list, 2000);
+
+      function get_new_sign_list() {
+        var data = {};
+        data.mid = $('#max_id').val();
+        $.ajax({
+          url: "./index.php?i=1&c=entry&rid=12&do=new_qd&m=meepo_xianchang",
+          dataType: "JSON",
+          type: "GET",
+          data: data,
+          success: function (result) {
+            if ($('#qd_persons').length > 0) {
+              result.total_nums = parseInt(result.total_nums);
+              $('.price-div').text(result.total_nums + ' 人');
+            }
+            if (result.mid) {
+              $('#max_id').val(result.mid);
+            }
+            if (result.omid < result.mid) {
+              personArray.push(result);
+              $('.element').eq(personArray.length - 1).find('img').attr('src', result.avatar);
+            }
+
+          } //success
+        });
+
+      };
+      setInterval(function () {
+        getArrayItems(personArray, 50);
+      }, 10 * 1000);
+    </script>
+    <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/three.min.js"></script>
+    <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/tween.min.js"></script>
+    <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/CSS3DRenderer.js"></script>
+    <script src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/js/3d.js?t=1512466383"></script>
+    <script type="text/javascript">
+      init();
+      animate();
+      transform(targets.table, 2000, 'table', 10);
+      var signAlert = $("#signAlert");
+      /* 新增功能，头像弹窗的展示与关闭 */
+      function addEventHandler(ele, event, hanlder) {
+        if (ele.addEventListener) {
+          ele.addEventListener(event, hanlder, false);
+        } else if (ele.attachEvent) {
+          ele.attachEvent("on" + event, hanlder);
+        } else {
+          ele["on" + event] = hanlder;
+        }
+      }
+
+      function isNull(value) {
+        if (typeof value === "undefined" || typeof value === "" || typeof value === "null" || value == "null" || value ==
+          null || value == "" || value == "undefined") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    </script>
+  </div>
+  <link rel="stylesheet" type="text/css" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/footer.css?t=1512466383">
+  <link rel="stylesheet" type="text/css" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/skin/style7.css">
+  <style>
+    .mp_account_codeimage {
+      display: none;
+    }
+  </style>
+  <style>
+    .helperpanel p {
+      margin: 1em !important
+    }
+  </style>
+  <div class="Panel Bottom">
+    <div class="bottommenu">
+      <img class="support_logo" src="http://of3kdd1ar.bkt.clouddn.com/images/1/2017/03/Q5gSN1py2MH28f6sex6eF0m31f65HP.png" onerror="javascript:this.src='http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/bottom.png'">
+      <div class="helperpanel pulse">
+        <span class="ssgz">
+          <p>搜索关注聚现场、
+            <span style="color: rgb(255, 192, 0);font-size: 20px;">点击菜单</span>即可参与
+            <strong>默认密码
+              <span style="color: rgb(255, 192, 0);">admin</span>
+            </strong>
+          </p>
+        </span>
+      </div>
+      <div class="navbar">
+        <ul class="navbarmenu">
+          <li class="curr">
+            <a class="neicon small" id="show_qd_code">
+              <img class="" src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icons-003.png">
+              <p>二维码</p>
+            </a>
+          </li>
+          <li class="curr">
+            <a onclick="document.getElementById('videoplay').style.display='block';" class="neicon small">
+              <img class="" src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icons-007.png">
+              <p>视频</p>
+            </a>
+          </li>
+          <li class="curr">
+            <a onclick="document.getElementById('skinLayer').style.display='block';" class="neicon small">
+              <img class="" src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icons-004.png">
+              <p>皮肤</p>
+            </a>
+          </li>
+          <li class="curr">
+            <a href="./index.php?i=1&c=entry&rid=12&small=0&do=lizi&m=meepo_xianchang" class="neicon small">
+              <img class="" src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icons-005.png">
+              <p>宽屏</p>
+            </a>
+          </li>
+          <li class="curr">
+            <a href="./index.php?i=1&c=entry&rid=12&small=1&do=lizi&m=meepo_xianchang" class="neicon small">
+              <img class="" src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icons-006.png">
+              <p>小屏</p>
+            </a>
+          </li>
+          <li class="curr">
+            <a onclick="document.getElementById('popup').style.display='block';" class="neicon small">
+              <img class="" src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icons-001.png">
+              <p>应用</p>
+            </a>
+          </li>
+          <li class="curr">
+            <a class="neicon small navbaritem fullscreen" href="#">
+              <img class="" src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icons-002.png">
+              <p>全屏</p>
+            </a>
+          </li>
+        </ul>
+        <div class="btn-popup hidden" id="popup">
+          <i class="closeb" onclick="document.getElementById('popup').style.display='none';"></i>
+          <i class="icon-arrow2"></i>
+          <ul class="btn-list clearfix">
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=qd&m=meepo_xianchang" class="neicon">
+                <i class="ico001 meepo-signin"></i>
+                <p>签到</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=lizi&m=meepo_xianchang" class="neicon">
+                <i class="ico016 meepo-threed"></i>
+                <p>粒子签到</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=wall&m=meepo_xianchang" class="neicon wall">
+                <i class="ico002 meepo-msgNum"></i>
+                <p>微信上墙</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=barwall&m=meepo_xianchang" class="neicon wall">
+                <i class="ico003 meepo-holdscreen"></i>
+                <p>霸屏上墙</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=lottory&m=meepo_xianchang" class="neicon">
+                <i class="ico004 meepo-gift"></i>
+                <p>抽奖</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=jb&m=meepo_xianchang" class="neicon">
+
+                <i class="ico005 meepo-guest"></i>
+                <p>嘉宾展示</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=vote&m=meepo_xianchang" class="neicon">
+                <i class="ico006 meepo-vote"></i>
+                <p>投票</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=shake&m=meepo_xianchang" class="neicon">
+                <i class="ico007 meepo-shake"></i>
+                <p>摇一摇</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=cjx&m=meepo_xianchang" class="neicon">
+                <i class="ico011 meepo-pie"></i>
+                <p>抽奖箱</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=redpack&m=meepo_xianchang" class="neicon">
+                <i class="ico017 meepo-redpacker"></i>
+                <p>抢红包</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=ddp&m=meepo_xianchang" class="neicon">
+                <i class="ico009 meepo-mstching"></i>
+                <p>对对碰</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=xc&m=meepo_xianchang" class="neicon">
+                <i class="ico010 meepo-photo"></i>
+                <p>相册</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=xyh&m=meepo_xianchang" class="neicon">
+                <i class="ico012 meepo-mstching"></i>
+                <p>幸运号码</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=zjd&m=meepo_xianchang" class="neicon">
+                <i class="ico015 meepo-stars"></i>
+                <p>砸金蛋</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=dm&m=meepo_xianchang" class="neicon">
+                <i class="ico013 meepo-msgNum"></i>
+                <p>上墙弹幕</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=xysjh&m=meepo_xianchang" class="neicon">
+                <i class="ico015 meepo-phone"></i>
+                <p>幸运手机号</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=tshake&m=meepo_xianchang" class="neicon">
+                <i class="ico008 meepo-shake"></i>
+                <p>团队摇一摇</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=dt&m=meepo_xianchang" class="neicon">
+                <i class="ico018 meepo-photo"></i>
+                <p>现场答题</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=mshake&m=meepo_xianchang" class="neicon">
+                <i class="ico019 meepo-shake"></i>
+                <p>猴子爬树</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&do=xys&m=meepo_xianchang" class="neicon">
+                <i class="ico001- meepo-heart"></i>
+                <p>许愿树</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&do=shuqian&m=meepo_xianchang" class="neicon">
+                <i class="ico002- meepo-money"></i>
+                <p>疯狂数钱</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&do=dzqy&m=meepo_xianchang" class="neicon">
+                <i class="ico002- meepo-signin"></i>
+                <p>电子签约</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&do=ydj&m=meepo_xianchang" class="neicon">
+                <i class="ico001 meepo-signin"></i>
+                <p>摇大奖</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&do=3dlottory&m=meepo_xianchang" class="neicon">
+                <i class="ico002- meepo-threed"></i>
+                <p>3D抽奖</p>
+              </a>
+            </li>
+            <li class="curr">
+              <a href="./index.php?i=1&c=entry&rid=12&do=3dyyy&m=meepo_xianchang" class="neicon">
+                <i class="ico001- meepo-shake"></i>
+                <p>3D摇一摇</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  <div class="videoplay" id="videoplay">
+    <i class="closeb" onclick="document.getElementById('videoplay').style.display='none';"></i>
+    <video class="video_id" id="video_id" controls autoplay></video>
+    <input id="v_file" type="file" style="display:none;" onChange="play()" />
+    <button id="play" onClick="yincang()" class="playbtn">打开MP4视频文件</button>
+    <script>
+      function yincang() {
+        var v_file = document.getElementById('v_file');
+        v_file.click();
+      }
+
+      function play() {
+        var file = document.getElementById('v_file').files[0];
+        var url = URL.createObjectURL(file);
+        console.log(url);
+        document.getElementById("video_id").src = url;
+
+      }
+    </script>
+  </div>
+  <div class="skinLayer" id="skinLayer">
+    <i class="closeb" onclick="document.getElementById('skinLayer').style.display='none';"></i>
+    <div class="stylebg">
+      <!--label>
+          <input name="" onchange="changeit(this)"      type="checkbox" value="1">
+          强制使用自定义背景</label-->
+    </div>
+    <div class="style-center">
+      <div class="style-nav">
+        <ul class="style-nav-list">
+
+        </ul>
+      </div>
+      <div class="style-box">
+        <ul class="style-img-list">
+
+        </ul>
+      </div>
+    </div>
+  </div>
+  <script>
+    function bigsmall(n) {}
+
+    function getmbhtml(cateid) { //点击具体某种分类 得到具体的风格背景
+      $(".style-img-list").load("./index.php?i=1&c=entry&control=lizi&rid=12&do=get_skins&m=meepo_xianchang&cateid=" +
+        cateid);
+
+      $(".style-nav-list li").each(function () {
+        $(this).removeClass("curr");
+      });
+      $("#li" + cateid).addClass("curr");
+    }
+
+    function getcatehtml() { //获取各种节日背景
+      $(".style-nav-list").load(
+        "./index.php?i=1&c=entry&control=lizi&rid=12&cateid=meepo&do=get_skins&m=meepo_xianchang");
+    }
+    getcatehtml();
+    getmbhtml(0); //默认获取全部风格
+  </script>
+  <div class="loginform" style="z-index:100">
+    <div class="activity_title">现场登录</div>
+    <div>
+      <input id="password" class="password" placeholder="请输入登录密码" type="password">
+    </div>
+    <div class="submitline">
+      <button class="button-login">开启</button>
+    </div>
+  </div>
+  <div class="loader" style="display: block;">
+    <div class="icon"></div>
+  </div>
+  <div class="bigmpcodebar">
+    <div class="closebutton"></div>
+    <div class="label">扫描下面的二维码参与签到</div>
+    <img src="http://wall.juxianchang.com/app/index.php?i=1&c=entry&url=.%2Findex.php%3Fi%3D1%26c%3Dentry%26rid%3D12%26do%3Dapp_qd%26m%3Dmeepo_xianchang&do=makeqrcode&m=meepo_xianchang"
+      onerror="javascript:this.src='../attachment/qrcode_1.jpg';">
+  </div>
+  <div class="show_qrcode">
+    <div class="closebutton"></div>
+    <div class="label">扫描下面的二维码关注公众号</div>
+    <img src="http://wall.juxianchang.com/attachment/images/1/2016/11/lE2Sj6EO42mM42Jzm5AnZK6OHHWMfm.jpg" onerror="javascript:this.src='../attachment/qrcode_1.jpg';">
+  </div>
+  <div id="leafContainer"></div>
+  <div id="effect"></div>
+  <div id="show_hide_nav">
+    <img src="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/opened.png">
+  </div>
+  <script>
+    var imgs = document.getElementsByTagName('img');
+    for (var i = 0, len = imgs.length; i < len; i++) {
+      imgs[i].onerror = function () {
+        if (!this.getAttribute('check-src') && (this.src.indexOf('http://') > -1 || this.src.indexOf('https://') > -1)) {
+          this.src = this.src.indexOf('http://wall.juxianchang.com/attachment/') == -1 ? this.src.replace(
+            'http://of3kdd1ar.bkt.clouddn.com/', 'http://wall.juxianchang.com/attachment/') : this.src.replace(
+            'http://wall.juxianchang.com/attachment/', 'http://of3kdd1ar.bkt.clouddn.com/');
+          this.setAttribute('check-src', true);
+        }
+      }
+    }
+  </script>
+</body>
+<!--星星效果-->
+<script>
+  $(document).ready(function () {
+    $("#show_hide_nav img").on('click', function () {
+      if ($("#panel_status").val() == 0) {
+        $(this).attr("src",
+          'http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/opened.png');
+        hidetb();
+        $("#panel_status").val("1");
+      } else {
+
+        showtb();
+        $("#panel_status").val("0");
+        $(this).attr("src",
+          'http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/chosed.png');
+
+      }
+    });
+    $("#bg_music").click(function (e) {
+      e.preventDefault();
+      if ($(this).attr('data-status') != 1) {
+        $("#audio")[0].play();
+        $(this).attr('data-status', '1');
+        $(this).find('img').attr('src',
+          'http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/images/icon/icon_music.png'
+        );
+      } else {
+        $("#audio")[0].pause();
+        $(this).attr('data-status', '0');
+        $(this).find('img').attr('src',
+          'http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/no_music.png');
+      }
+    });
+    $("#show_qd_code").click('click', function () {
+      $(".bigmpcodebar").slideUp()
+      $(".show_qrcode").slideDown();
+    });
+    $(".show_qrcode .closebutton").on("click", function () {
+      //$(".bigmpcodebar").slideUp()
+      $(".show_qrcode").slideUp()
+    });
+  });
+
+  function showtb() {
+    $(".Panel.Top").css({
+      top: "-" + $(".Panel.Top").height() + "px"
+    });
+    $(".Panel.Bottom").css({
+      bottom: "-" + $(".Panel.Bottom").height() + "px"
+    });
+  }
+
+  function hidetb() {
+    $(".Panel.Top").css({
+      top: 0
+    });
+    $(".Panel.Bottom").css({
+      bottom: 0
+    })
+  };
+</script>
+<input type="hidden" id="panel_status" value="1" />
+
+<script>
+  //快捷键
+  document.onkeypress = function (event) {
+    if ($(".loginform").css("display") == 'block') {
+      return;
+    }
+    var e = event || window.event;
+    var keyCode = e.keyCode || e.which;
+    switch (keyCode) {
+      case 102:
+        if ($('#skinLayer').css("display") == 'none') {
+          $('#skinLayer').show();
+        } else {
+          $('#skinLayer').hide();
+        }
+        break;
+      case 70:
+        if ($('#skinLayer').css("display") == 'none') {
+          $('#skinLayer').show();
+        } else {
+          $('#skinLayer').hide();
+        }
+        break;
+      case 113:
+        //q
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=qd&m=meepo_xianchang";
+        break;
+      case 81:
+        //Q
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=qd&m=meepo_xianchang";
+        break;
+      case 104:
+        //q
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=mshake&m=meepo_xianchang";
+        break;
+      case 72:
+        //Q
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=mshake&m=meepo_xianchang";
+        break;
+      case 75:
+        //Q
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=dt&m=meepo_xianchang";
+        break;
+      case 107:
+        //q
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=dt&m=meepo_xianchang";
+        break;
+      case 109:
+        //m
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=wall&m=meepo_xianchang";
+        break;
+      case 77:
+        //M
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=wall&m=meepo_xianchang";
+        break;
+      case 99:
+        //c
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=lottory&m=meepo_xianchang";
+        break;
+      case 67:
+        //C
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=lottory&m=meepo_xianchang";
+        break;
+      case 116:
+        //t
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=vote&m=meepo_xianchang";
+        break;
+      case 84:
+        //T
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=vote&m=meepo_xianchang";
+        break;
+      case 100:
+        //d
+
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=ddp&m=meepo_xianchang";
+        break;
+      case 68:
+        //d
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=ddp&m=meepo_xianchang";
+        break;
+      case 120:
+        //x
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=xc&m=meepo_xianchang";
+        break;
+      case 80:
+        //x
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=xc&m=meepo_xianchang";
+        break;
+
+      case 110:
+        //n
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=dm&m=meepo_xianchang";
+        break;
+      case 78:
+        //n
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=dm&m=meepo_xianchang";
+        break;
+      case 89: //Y
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=shake&m=meepo_xianchang";
+        break;
+      case 121: //y
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=shake&m=meepo_xianchang";
+        break;
+      case 74: //J 嘉宾
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=jb&m=meepo_xianchang";
+        break;
+      case 106: //J 嘉宾
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=jb&m=meepo_xianchang";
+        break;
+      case 76: //L LIZI
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=lizi&m=meepo_xianchang";
+        break;
+      case 108: //L LIZI
+      case 98:
+        //d
+
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=barwall&m=meepo_xianchang";
+        break;
+      case 66:
+        //d
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=barwall&m=meepo_xianchang";
+        break;
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=lizi&m=meepo_xianchang";
+        break;
+      case 90: //z 砸金蛋
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=zjd&m=meepo_xianchang";
+        break;
+      case 122: //砸金蛋
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=zjd&m=meepo_xianchang";
+        break;
+      case 82: //redpack
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=redpack&m=meepo_xianchang";
+        break;
+      case 114: //L redpack
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=redpack&m=meepo_xianchang";
+        break;
+      case 112: //f1
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=xyh&m=meepo_xianchang";
+        break;
+      case 113: //f2
+        window.location.href = "./index.php?i=1&c=entry&rid=12&small=0&t=1512466383&do=xysjh&m=meepo_xianchang";
+        break;
+
+      default:
+        break;
+    }
+  }
+</script>
+
+</html>
