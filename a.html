@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="http://wall.juxianchang.com/addons/meepo_xianchang/template/mobile/app/css/3d.css?t=1512466383">
+</head>
+<body>
+  <script src="js/three.min.js" ></script>
+  <script src="js/tween.min.js" ></script>
+  <script src="js/TrackballControls.js" ></script>
+  <script src="js/CSS3DRenderer.js" ></script>
+  <script src="js/3d.js" ></script>
+  <script src="js/user.js"></script>
+  <div id="container"></div>
+  <script>
+    var table = new Array;
+    for (var i = 0; i < 160; i++) {
+      table[i] = new Object();
+      if (i < personArray.length) {
+        table[i] = personArray[i];
+        table[i].src = personArray[i].avatar;
+      } else {
+        if (placeholder_image_cnt > 0) {
+          if (placeholder_image_index >= placeholder_image_cnt) {
+            placeholder_image_index = 0;
+          }
+          placeholder_image = placeholder_image_arr[placeholder_image_index];
+          placeholder_image_index++;
+        }
+        table[i].src = placeholder_image;
+      }
+      table[i].p_x = i % 20 + 1;
+      table[i].p_y = Math.floor(i / 20) + 1;
+    }
+    //打乱数组顺序
+    table = table.sort(function () {
+      return Math.random()
+    });
+    init();
+    animate();
+    // transform(targets.table, 2000, 'table', 10);
+    // transform(targets.sphere, 2000, 'sphere', 40);
+    setTimeout(function () {
+      transform(targets.sphere, 2000, 'sphere', 40);
+    }, 40);
+  </script>
+</body>
+</html>

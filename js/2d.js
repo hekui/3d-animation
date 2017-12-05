@@ -2,12 +2,14 @@
 
 var S = {
   init: function () {
-    var action = window.location.href,
-      i = action.indexOf('?a=');
-
+    // var action = window.location.href,
+    //   i = action.indexOf('?a=');
+    
     S.Drawing.init('.canvas');
+    // var signwall_show_str = "27°|我们等你|#sphere|#helix|#torus";
+    // S.UI.simulate(signwall_show_str);
     S.ShapeBuilder.init();
-    S.UI.init();
+    // S.UI.init(); // by hekui
     //document.body.classList.add('body--ready');
 
     /*if (i !== -1) {
@@ -15,7 +17,7 @@ var S = {
     } else {
       opening();
     }*/
-
+    
     S.Drawing.loop(function () {
       S.Shape.render();
     });
@@ -281,6 +283,7 @@ S.UI = (function () {
           break;
 
         case 'sphere':
+          console.log('in sphere')
           if (can == 1) {
             S.Shape.switchShape(S.ShapeBuilder.letter(''));
             setTimeout(function () {

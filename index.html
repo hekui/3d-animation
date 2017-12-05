@@ -49,8 +49,8 @@
     init: function () {
       S.Drawing.init('.canvas');
       document.body.classList.add('body--ready');
-      var text = '27°|我们等你|#countdown 3|ChuangJia';
-      // var text = '27°|我们等你|#countdown 3|#icon thumbs-up';
+      // var text = '27°|我们等你|#countdown 3|ChuangJia';
+      var text = '27°|我们等你|#countdown 3|#icon http://www.m3d.hk/images/logo.png';
       // if (window.innerWidth < 600) {
       //   text = 'H|a|c|P|a|i|';
       // }
@@ -107,6 +107,11 @@
         context.arc(p.x, p.y, p.z, 0, 2 * Math.PI, true);
         context.closePath();
         context.fill();
+      },
+      drawImage: function (p, c, x) {
+        var image = new Image();
+        image.src = x;
+        context.drawImage(image, p.x, p.y, p.z * 3, p.z * 3);
       }
     };
   }());
@@ -211,7 +216,11 @@
               }, 1000);
             }
             break;
-
+          case 'icon':
+            S.ShapeBuilder.imageFile(value, function (obj) {
+              S.Shape.switchShape(obj);
+            });
+            break;
           default:
             S.Shape.switchShape(S.ShapeBuilder.letter(current[0] === cmd ? 'slogan' : current));
             if (current === '') {
@@ -282,9 +291,13 @@
         h: this.h
       });
     },
-    _draw: function () {
+    _draw: function (x) {
       this.c.a = this.p.a;
-      S.Drawing.drawCircle(this.p, this.c);
+      if(x){
+        S.Drawing.drawImage(this.p, this.c, x);
+      }else{
+        S.Drawing.drawCircle(this.p, this.c);
+      }      
     },
     _moveTowards: function (n) {
       var details = this.distanceTo(n, true),
@@ -352,15 +365,15 @@
         this.q.push(p);
       }
     },
-    render: function () {
+    render: function (x) {
       this._update();
-      this._draw();
+      this._draw(x);
     }
   };
 
 
   S.ShapeBuilder = (function () {
-    var gap = 13,
+    var gap = 15,
       shapeCanvas = document.createElement('canvas'),
       shapeContext = shapeCanvas.getContext('2d'),
       fontSize = 500,
@@ -585,7 +598,7 @@
       },
       render: function () {
         for (var d = 0; d < dots.length; d++) {
-          dots[d].render('http:\/\/wx.qlogo.cn\/mmopen\/X4XEGYefSBSE3L27Hhib9jYhOmKlqERCMdNibrpP9NgjQNWa2fw6ll5ThBkSMXUqmzpCv5cUOYYIQaKiao06ULlfA\/64');
+          dots[d].render('http://wx.qlogo.cn/mmopen/VV1gIQ9mWn8ic1ibtiblJFKB5ib99MVSiafbb92r7OekOG0THk2ibg7ztzNCJiag42z5BfLGL5OLwCQOO6icwLWBNfohQdmDSKTqiaZibT/0');
         }
       }
     };
